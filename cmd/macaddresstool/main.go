@@ -33,11 +33,6 @@ func main() {
 				Usage:   "Output format (json or yaml)",
 				EnvVars: []string{"MACADDRESSTOOL_OUTPUT_FORMAT"},
 			},
-			&cli.StringFlag{
-				Name:    "selector",
-				Aliases: []string{"s"},
-				Usage:   "Use to filter results to specific keys/values (see https://github.com/tidwall/gjson for syntax)",
-			},
 		},
 		Action: func(c *cli.Context) error {
 			return nil
