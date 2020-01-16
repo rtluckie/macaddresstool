@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
+	"github.com/tidwall/gjson"
 )
 
 type Query struct {
@@ -69,4 +70,14 @@ func (q *Query) GetResult() (string, error) {
 		return "", err
 	}
 	return string(result), nil
+}
+
+func (q *Query) GetSelection(selector string) (string, error) {
+	data, err := yaml.YAMLToJSON(q.Result)
+	if err != nil {
+		return "", err
+	}
+	selection := gjson.Get(string(data), selector)
+	return selection.String(), nil
+
 }
