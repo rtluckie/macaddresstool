@@ -1,5 +1,6 @@
 .DEFAULT: help
-.PHONY: help clean build-docker build-bin install-bin
+
+.PHONY: help clean build build-docker build-bin install-bin
 
 SUDO := $(shell docker info > /dev/null 2> /dev/null || echo "sudo")
 
@@ -13,17 +14,19 @@ GOBIN?=$(shell echo `go env GOPATH`/bin)
 
 godeps=$(shell go list -deps -f '{{if not .Standard}}{{ $$dep := . }}{{range .GoFiles}}{{$$dep.Dir}}/{{.}} {{end}}{{end}}' $(1) | sed "s%${PWD}/%%g")
 
-DEPS:=$(call godeps,./cmd/...)
+DEPS:=$(call godeps,./cmd/macaddresstool/...)
 
 IMAGE_TAG:=$(shell ./hack/tools image-tag)
 VCS_REF:=$(shell git rev-parse HEAD)
 BUILD_DATE:=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 
 clean:
-	go clean
+	go clean ./cmd/... ./pkg/...
 	rm -rf ./build
 
-build-docker: clean build-bin
+build: clean build-bin build-docker
+
+build-docker:
 	mkdir -p ./build/docker
 	cp -pr ./build/bin/* ./build/docker/
 	cp ./Dockerfile ./build/docker/
@@ -34,11 +37,14 @@ build-docker: clean build-bin
 		--build-arg BUILD_DATE="$(BUILD_DATE)" \
 		-f build/docker/Dockerfile ./build/docker/
 
-build-bin: clean $(DEPS) cmd/macaddresstool/*.go
+build-bin: $(DEPS) cmd/macaddresstool/*.go
 	CGO_ENABLED=0 GOOS=linux GOARCH=${ARCH} go build -o ./build/bin/macaddresstool $(LDFLAGS) -ldflags "-s -w -X main.version=$(shell ./hack/tools image-tag)" ./cmd/macaddresstool
 
 install-bin: $(DEPS)
 	go install ./cmd/macaddresstool
+
+test:
+	go test ./cmd/macaddresstool ./pkg/macaddressio
 
 help:
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
