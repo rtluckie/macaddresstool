@@ -1,9 +1,12 @@
 package main
 
 import (
-	"github.com/urfave/cli/v2"
+	"fmt"
 	"log"
 	"os"
+
+	"github.com/rtluckie/macaddresstool/pkg/macaddressio"
+	"github.com/urfave/cli/v2"
 )
 
 var version = "unversioned"
@@ -35,6 +38,23 @@ func main() {
 			},
 		},
 		Action: func(c *cli.Context) error {
+			query := macaddressio.Query{}
+			query.Address = c.String("address")
+			query.ApiKey = c.String("api-key")
+			query.OutputFormat = c.String("output")
+			err := query.Validate()
+			if err != nil {
+				return err
+			}
+			err = query.Request()
+			if err != nil {
+				return err
+			}
+			result, err := query.GetResult()
+			if err != nil {
+				return err
+			}
+			fmt.Println(result)
 			return nil
 		},
 	}
