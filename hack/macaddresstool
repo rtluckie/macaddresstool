@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -eo pipefail
-echo $@
-echo 'heloooooo'
+
 macaddresstool-wrapper(){
   if [[ -z "${MACADDRESSIO_API_KEY}" ]]; then
     echo "Please set the MACADDRESSIO_API_KEY env var e.g. export MACADDRESSIO_API_KEY='<YOUR_API_KEY>'"
